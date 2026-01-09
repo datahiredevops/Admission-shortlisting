@@ -5,6 +5,7 @@
   --foreground: #171717;
 }
 
+/* Restores the main theme */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,15 +13,47 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Force Light Mode (No Dark Mode) */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- THE "NUCLEAR" FIX FOR INPUTS --- */
+/* This forces black text and visible borders on all inputs */
+input, 
+textarea, 
+select {
+  color: #111827 !important;       /* Dark Gray Text */
+  background-color: #ffffff !important; /* White Background */
+  border: 1px solid #d1d5db !important; /* Light Gray Border */
+  border-radius: 0.5rem; /* Rounded corners */
+}
+
+/* Fix Placeholders */
+::placeholder {
+  color: #9ca3af !important; /* Medium Gray */
+  opacity: 1; 
+}
+
+/* Fix Dropdown Options */
+option {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Fix Date Picker Icon */
+input[type="date"] {
+  color: #111827 !important;
+  color-scheme: light; 
+}
+
+/* Focus State - Blue Border */
+input:focus, 
+textarea:focus, 
+select:focus {
+  border-color: #2563eb !important; /* Blue */
+  outline: 2px solid #2563eb !important;
+  outline-offset: 1px;
 }
