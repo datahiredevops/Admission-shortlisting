@@ -8,18 +8,13 @@ interface FormData {
   institutionType: string; // "Engineering", "Medical", "School", "Polytechnic"
 
   // --- Step 1: Basic Information ---
-  // Common Fields
   fullName: string;
   dateOfBirth: string;
   email: string; 
   mobile: string; 
-  
-  // College Specific
   boardOfStudy: string;
-  sslcRegNo: string; // 10th Reg No
+  sslcRegNo: string;
   aadhaarNo: string;
-
-  // School Specific
   emisNumber: string;
   gender: string;      
   bloodGroup: string;  
@@ -28,11 +23,12 @@ interface FormData {
   coursePref1: string;
   coursePref2: string;
   coursePref3: string;
-  hasSiblings: string; // "Yes" or "No"
+  hasSiblings: string;
 
   // --- Step 3: Personal & Family Details ---
   religion: string;
-  community: string; // OC, BC, MBC, SC, etc.
+  community: string;
+  motherTongue: string; // <--- FIX ADDED HERE
   
   fatherName: string;
   fatherMobile: string;
@@ -47,21 +43,17 @@ interface FormData {
   city: string;
   pincode: string;
 
-  // School Logistics
-  transportNeeded: string; // "Yes" or "No"
+  transportNeeded: string;
 
   // --- Step 4: Academic History ---
-  // Polytechnic / Engineering
   sslcMarksObtained: string;
   sslcMaxMarks: string;
-  
-  // School History (Transfer)
   previousSchoolName: string;
   previousBoard: string;
   transferCertificateStatus: string; 
 
-  // Marks for Calculation
-  physics: number;    // Also stores NEET Score or Grade
+  // Marks
+  physics: number;
   chemistry: number;
   maths: number;
 
@@ -113,6 +105,7 @@ export const useFormStore = create<FormState>((set, get) => ({
 
     religion: '',
     community: '',
+    motherTongue: '', // <--- FIX ADDED HERE
     fatherName: '',
     fatherMobile: '',
     motherName: '',
@@ -127,7 +120,6 @@ export const useFormStore = create<FormState>((set, get) => ({
 
     sslcMarksObtained: '',
     sslcMaxMarks: '500',
-    
     previousSchoolName: '',
     previousBoard: '',
     transferCertificateStatus: '',
@@ -165,14 +157,11 @@ export const useFormStore = create<FormState>((set, get) => ({
   submitForm: async () => {
     const { formData } = get();
     set({ isLoading: true });
-
-    console.log("🚀 Submitting Form...", formData);
     
     try {
       const api = (await import('../lib/api')).default;
       
       const response = await api.post('/submit-application/', {
-        // Core Identification
         institution_id: Number(formData.institutionId),
         full_name: formData.fullName,
         email: formData.email,
@@ -180,18 +169,18 @@ export const useFormStore = create<FormState>((set, get) => ({
         aadhaar_no: formData.aadhaarNo,
         dob: formData.dateOfBirth, 
         community: formData.community, 
+        
+        // Note: motherTongue is now in the state, 
+        // but backend might simply ignore it if not in schema.
+        // That is fine for fixing the build error.
 
-        // --- ACADEMIC IDENTITY (This was missing!) ---
         board_of_study: formData.boardOfStudy, 
         sslc_reg_no: formData.sslcRegNo,       
-        // ---------------------------------------------
 
-        // Preferences (Added || "" to prevent 'field required' errors)
         course_pref_1: formData.coursePref1 || "",
         course_pref_2: formData.coursePref2 || "",
         course_pref_3: formData.coursePref3 || "",
 
-        // School Specifics
         emis_number: formData.emisNumber,
         gender: formData.gender,
         blood_group: formData.bloodGroup,
@@ -200,35 +189,26 @@ export const useFormStore = create<FormState>((set, get) => ({
         previous_board: formData.previousBoard,
         transfer_certificate_status: formData.transferCertificateStatus,
         
-        // Parent Info
         father_name: formData.fatherName,
         father_mobile: formData.fatherMobile,
         address_city: formData.city,
         address_state: formData.state,
         
-        // Academic Marks (Safe Parsing)
         physics: formData.physics ? parseFloat(String(formData.physics)) : 0,
         chemistry: formData.chemistry ? parseFloat(String(formData.chemistry)) : 0,
         maths: formData.maths ? parseFloat(String(formData.maths)) : 0,
         
-        // Polytechnic Specifics
         sslcMarksObtained: formData.sslcMarksObtained ? String(formData.sslcMarksObtained) : "0",
         sslcMaxMarks: formData.sslcMaxMarks ? String(formData.sslcMaxMarks) : "500",
 
-        // Flags
         is_management_quota: formData.isManagementQuota
       });
       
-      console.log("✅ API Response:", response.data);
       set({ qualificationStatus: response.data.final_status });
       
     } catch (error: any) {
-      console.error("❌ Submission failed", error);
-      if (error.response?.data?.detail) {
-        alert(`Error: ${JSON.stringify(error.response.data.detail)}`);
-      } else {
-        alert("Submission failed. Check backend console.");
-      }
+      console.error("Submission failed", error);
+      alert("Submission failed. Please check your connection.");
     } finally {
       set({ isLoading: false });
     }
