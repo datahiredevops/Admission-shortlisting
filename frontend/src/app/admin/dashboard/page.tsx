@@ -3,8 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Building2, GraduationCap, Stethoscope, 
-  CheckCircle, XCircle, AlertTriangle, Users, ChevronDown, FileText, 
-  TrendingUp, Clock, MessageSquare, Send, X, Sparkles 
+  ChevronDown, FileText, 
+  MessageSquare, Send, X, Sparkles 
 } from "lucide-react";
 import api from "../../../lib/api";
 
@@ -152,28 +152,60 @@ export default function AdminDashboard() {
     const medStats = getCategoryStats('Medical');
     const schoolStats = getCategoryStats('School');
 
-    const renderCard = (title: string, category: string, stats: any, Icon: any, color: string, bg: string, border: string) => (
-        <div 
-            onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-            className={`bg-white p-6 rounded-xl shadow-sm border-l-8 cursor-pointer transition-all transform hover:-translate-y-1 ${selectedCategory === category ? `border-${color}-600 ring-2 ring-${color}-100` : border}`}
-        >
-            <div className="flex justify-between items-start mb-4">
-                <div className={`${bg} p-3 rounded-full text-${color}-600`}><Icon size={28}/></div>
-                <ChevronDown className={`text-gray-400 transition-transform ${selectedCategory === category ? 'rotate-180' : ''}`}/>
+    // --- DEMO CAPACITY LOGIC ---
+    const getCapacity = (category: string) => {
+        if (category === 'Engineering') return 100; // Demo Capacity
+        if (category === 'Medical') return 50;      // Demo Capacity
+        if (category === 'School') return 200;      // Demo Capacity
+        return 100;
+    };
+
+    const renderCard = (title: string, category: string, stats: any, Icon: any, color: string, bg: string, border: string) => {
+        const capacity = getCapacity(category);
+        const admitted = stats.accepted;
+        // Calculate percentage (max 100 to avoid breaking layout)
+        const percentage = Math.min(100, Math.round((admitted / capacity) * 100));
+        
+        return (
+            <div 
+                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                className={`bg-white p-6 rounded-xl shadow-sm border-l-8 cursor-pointer transition-all transform hover:-translate-y-1 ${selectedCategory === category ? `border-${color}-600 ring-2 ring-${color}-100` : border}`}
+            >
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`${bg} p-3 rounded-full text-${color}-600`}><Icon size={28}/></div>
+                    <ChevronDown className={`text-gray-400 transition-transform ${selectedCategory === category ? 'rotate-180' : ''}`}/>
+                </div>
+                
+                <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+                
+                {/* --- NEW PROGRESS BAR SECTION --- */}
+                <div className="mt-4 mb-2">
+                    <div className="flex justify-between text-xs font-semibold mb-1 text-gray-600">
+                        <span>{percentage > 90 ? "Critical Availability" : "Admissions Open"}</span>
+                        <span className="text-gray-900">{admitted} / {capacity} Seats Filled</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                            className={`h-2.5 rounded-full transition-all duration-500 ${percentage > 90 ? 'bg-red-500' : 'bg-green-500'}`} 
+                            style={{ width: `${percentage}%` }}
+                        ></div>
+                    </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-y-2 text-sm">
+                    <div className="text-gray-500">Applied: <span className="font-bold text-gray-900">{stats.total}</span></div>
+                    <div className="text-green-600">Admitted: <span className="font-bold">{stats.accepted}</span></div>
+                    <div className="text-red-500">Declined: <span className="font-bold">{stats.declined}</span></div>
+                    <div className="text-yellow-600">Waitlist: <span className="font-bold">{stats.waitlisted}</span></div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-xs text-gray-400 uppercase font-bold">Revenue Collected</p>
+                    <p className="text-2xl font-bold text-green-700">₹ {stats.revenue.toLocaleString()}</p>
+                </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-            <div className="mt-4 grid grid-cols-2 gap-y-2 text-sm">
-                <div className="text-gray-500">Applied: <span className="font-bold text-gray-900">{stats.total}</span></div>
-                <div className="text-green-600">Admitted: <span className="font-bold">{stats.accepted}</span></div>
-                <div className="text-red-500">Declined: <span className="font-bold">{stats.declined}</span></div>
-                <div className="text-yellow-600">Waitlist: <span className="font-bold">{stats.waitlisted}</span></div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-400 uppercase font-bold">Revenue Collected</p>
-                <p className="text-2xl font-bold text-green-700">₹ {stats.revenue.toLocaleString()}</p>
-            </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans pb-24">
@@ -295,7 +327,7 @@ export default function AdminDashboard() {
                             <span className={`font-bold text-xs px-2 py-1 rounded ${app.application_status === "Accepted" ? "bg-green-50 text-green-700" : app.application_status === "Waitlisted" ? "bg-yellow-50 text-yellow-700" : "bg-red-50 text-red-700"}`}>{app.application_status.toUpperCase()}</span>
                             {/* Admit Letter Icon */}
                             {app.application_status === "Accepted" && app.admit_letter_url && (
-                                <a href={`http://localhost:8000/files/${app.admit_letter_url}`} target="_blank" className="text-blue-600 hover:text-blue-800" title="View Admit Letter"><FileText size={18}/></a>
+                                <a href={app.admit_letter_url} target="_blank" className="text-blue-600 hover:text-blue-800" title="View Admit Letter"><FileText size={18}/></a>
                             )}
                         </div>
                       )}

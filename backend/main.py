@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+# from fastapi.staticfiles import StaticFiles  <-- Removed (Not needed for Cloudinary)
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -16,14 +16,17 @@ app = FastAPI(title="Sairam Group Admission Portal")
 # CORS (Allows Frontend to talk to Backend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://192.168.1.166:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# MOUNT THE FILES FOLDER (Crucial for downloading the PDF)
-app.mount("/files", StaticFiles(directory="admit_letters"), name="letters")
+# NOTE: app.mount("/files"...) is REMOVED. 
+# We now use Cloudinary URLs which are direct links (e.g., https://res.cloudinary.com/...)
 
 # ==========================================
 # 1. SCHEMAS (Data Rules)
@@ -189,7 +192,13 @@ def submit_application(app_data: ApplicationSchema, db: Session = Depends(databa
     new_application.application_ref_id = ref_id
     db.commit()
     
-    return {"message": "Submitted", "app_id": new_application.id, "ref_id": ref_id}
+    return {
+        "message": "Application Submitted Successfully",
+        "app_id": new_application.id,
+        "application_ref_id": ref_id,
+        "final_status": final_status,
+        "ai_probability": result["ai_prediction"]["percentage"]
+    }
 
 
 # ==========================================
@@ -288,7 +297,7 @@ def login_admin(creds: AdminLoginSchema, db: Session = Depends(database.get_db))
 def get_admin_applications(institution_id: int, db: Session = Depends(database.get_db)):
     return db.query(models.StudentApplication).filter(models.StudentApplication.institution_id == institution_id).all()
 
-# --- STATUS UPDATE + PDF GENERATION ---
+# --- STATUS UPDATE + CLOUD PDF GENERATION ---
 @app.put("/admin/application/{app_id}/status")
 def update_status(app_id: int, update: StatusUpdateSchema, db: Session = Depends(database.get_db)):
     application = db.query(models.StudentApplication).filter(models.StudentApplication.id == app_id).first()
@@ -297,14 +306,15 @@ def update_status(app_id: int, update: StatusUpdateSchema, db: Session = Depends
     # Update Status First
     application.application_status = update.status
     
-    # If Accepted, Generate PDF Immediately
+    # If Accepted, Generate PDF Immediately (Uploads to Cloudinary)
     if update.status == "Accepted":
         print(f"📄 Generating Offer Letter for {application.full_name}...")
         
         inst_name = application.institution.name if application.institution else "Sairam Institution"
         inst_type = application.institution.institution_type if application.institution else "College"
         
-        filename = utils_pdf.generate_admit_letter(
+        # This now returns a full URL string (e.g., "https://res.cloudinary.com/...")
+        file_url = utils_pdf.generate_admit_letter(
             student_name=application.full_name,
             course=application.course_pref_1,
             ref_id=application.application_ref_id,
@@ -312,8 +322,11 @@ def update_status(app_id: int, update: StatusUpdateSchema, db: Session = Depends
             institution_type=inst_type
         )
         
-        application.admit_letter_url = filename
-        print(f"✅ Saved Offer Letter: {filename}")
+        if file_url:
+            application.admit_letter_url = file_url
+            print(f"✅ Saved Cloud Offer Letter: {file_url}")
+        else:
+            print("❌ Failed to save offer letter.")
 
     db.commit()
     return {"message": f"Status updated to {update.status}"}

@@ -182,7 +182,7 @@ export default function StudentDashboard() {
                         {/* --- OFFER LETTER DOWNLOAD (Before Payment) --- */}
                         {selectedApp.admit_letter_url && (
                             <div className="mt-4 pt-4 border-t border-green-200">
-                                <a href={`http://localhost:8000/files/${selectedApp.admit_letter_url}`} target="_blank" className="flex items-center gap-2 text-green-800 font-bold hover:underline"><FileText size={18}/> View Provisional Offer Letter</a>
+                                <a href={selectedApp.admit_letter_url} target="_blank" className="flex items-center gap-2 text-green-800 font-bold hover:underline"><FileText size={18}/> View Provisional Offer Letter</a>
                             </div>
                         )}
                     </div>
