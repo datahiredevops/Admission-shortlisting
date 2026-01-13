@@ -137,6 +137,8 @@ class StudentApplication(Base):
     # --- NEW: AI PREDICTION ---
     ai_probability = Column(Integer, nullable=True) # Stores calculated % chance (e.g., 92)
 
+    admit_letter_url = Column(String, nullable=True)
+
     # --- Step 5: Status & Decision ---
     is_management_quota = Column(Boolean, default=False)
     application_status = Column(String, default="Pending")    # Pending, Accepted, Declined, Offer Accepted, Waitlisted
@@ -144,3 +146,8 @@ class StudentApplication(Base):
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    payment_status = Column(String, default="Pending") # "Pending", "Paid"
+    amount_paid = Column(Float, default=0.0)           # e.g., 50000.0
+    transaction_id = Column(String, nullable=True)     # e.g., "TXN_12345"
+    payment_date = Column(DateTime, nullable=True)

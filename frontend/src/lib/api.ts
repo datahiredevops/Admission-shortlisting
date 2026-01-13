@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Automatically uses the environment variable in production
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000', // Your FastAPI URL
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
