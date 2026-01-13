@@ -1,98 +1,86 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, Lock, CheckCircle, ShieldCheck } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, Suspense } from "react"; // <--- Import Suspense
 import api from "../../../lib/api";
 
-export default function PaymentPage() {
-  const router = useRouter();
+// 1. Create a Sub-Component for the Logic
+function PaymentContent() {
   const searchParams = useSearchParams();
-  const appId = searchParams.get("app_id");
-  const type = searchParams.get("type"); // "Medical", "Engineering", etc.
-
-  const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  // Determine Fee Amount based on Type (Demo Logic)
-  let feeAmount = 25000; // Default School
-  if (type === "Engineering") feeAmount = 50000;
-  if (type === "Medical") feeAmount = 100000;
-  if (type === "Polytechnic") feeAmount = 30000;
+  const router = useRouter();
+  
+  // Get data from URL
+  const amount = searchParams.get("amount");
+  const appId = searchParams.get("appId");
+  
+  const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
-    setProcessing(true);
-    
-    // Simulate Bank Delay (2 seconds)
-    setTimeout(async () => {
-      try {
+    setLoading(true);
+    try {
+        // Simulate Payment API Call
         await api.post("/student/pay-fee/", {
-          amount: feeAmount,
-          application_id: appId
+            amount: Number(amount),
+            application_id: appId
         });
-        setSuccess(true);
-        // Redirect back to dashboard after 2 more seconds
-        setTimeout(() => router.push("/student/dashboard"), 2000);
-      } catch (err) {
-        alert("Payment Failed");
-        setProcessing(false);
-      }
-    }, 2000);
+        
+        alert("Payment Successful! Admission Confirmed.");
+        router.push("/student/dashboard");
+        
+    } catch (error) {
+        alert("Payment Failed. Try again.");
+    } finally {
+        setLoading(false);
+    }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <div className="text-center animate-in zoom-in duration-300">
-          <div className="bg-green-100 p-6 rounded-full inline-block mb-4">
-            <CheckCircle className="w-16 h-16 text-green-600" />
-          </div>
-          <h1 className="text-3xl font-bold text-green-800">Payment Successful!</h1>
-          <p className="text-green-600 mt-2">Admission Confirmed. Redirecting...</p>
-        </div>
-      </div>
-    );
+  if (!amount || !appId) {
+      return <div className="p-10 text-center text-red-500">Invalid Payment Link</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white max-w-md w-full rounded-xl shadow-2xl overflow-hidden">
-        <div className="bg-blue-900 p-6 text-white text-center">
-          <h2 className="text-xl font-bold">Secure Payment Gateway</h2>
-          <p className="text-blue-300 text-sm flex items-center justify-center gap-1 mt-1">
-            <Lock size={12} /> 256-bit SSL Encrypted
-          </p>
-        </div>
-
-        <div className="p-8">
-          <div className="mb-6 text-center">
-            <p className="text-gray-500 text-sm uppercase">Admission Fee</p>
-            <h1 className="text-4xl font-bold text-gray-800">₹ {feeAmount.toLocaleString()}</h1>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-              <CreditCard className="text-blue-600" />
-              <div>
-                <p className="text-sm font-bold text-gray-700">Demo Card</p>
-                <p className="text-xs text-gray-500">**** **** **** 4242</p>
-              </div>
+    <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-xl shadow-lg border border-gray-200 text-center">
+        <div className="text-4xl mb-4">💳</div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Confirm Payment</h1>
+        <p className="text-gray-500 mb-6">Complete your admission process.</p>
+        
+        <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
+            <div className="flex justify-between mb-2">
+                <span className="text-gray-600">Application Ref:</span>
+                <span className="font-mono font-bold">{appId}</span>
             </div>
-          </div>
-
-          <button 
-            onClick={handlePayment}
-            disabled={processing}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all"
-          >
-            {processing ? "Processing..." : `Pay ₹ ${feeAmount.toLocaleString()}`}
-          </button>
-          
-          <div className="mt-6 flex justify-center gap-4 opacity-50">
-             <ShieldCheck size={20}/> 
-             <span className="text-xs">Trusted by Sairam Group</span>
-          </div>
+            <div className="flex justify-between text-lg font-bold text-blue-900">
+                <span>Total Amount:</span>
+                <span>₹ {Number(amount).toLocaleString()}</span>
+            </div>
         </div>
-      </div>
+
+        <button 
+            onClick={handlePayment}
+            disabled={loading}
+            className={`w-full py-3 rounded-lg font-bold text-white shadow-md transition-all ${
+                loading ? "bg-gray-400 cursor-wait" : "bg-green-600 hover:bg-green-700 hover:shadow-lg"
+            }`}
+        >
+            {loading ? "Processing..." : "Pay Now & Confirm Seat"}
+        </button>
+        
+        <button 
+            onClick={() => router.back()}
+            className="mt-4 text-sm text-gray-500 hover:text-gray-800 underline"
+        >
+            Cancel
+        </button>
+    </div>
+  );
+}
+
+// 2. Main Page Component (Wraps Content in Suspense)
+export default function PaymentPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 p-4">
+      <Suspense fallback={<div className="text-center p-10">Loading Payment Gateway...</div>}>
+        <PaymentContent />
+      </Suspense>
     </div>
   );
 }
