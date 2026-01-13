@@ -18,7 +18,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000", 
-        "http://192.168.1.166:3000"
+        "http://192.168.1.166:3000","https://admission-shortlisting.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
