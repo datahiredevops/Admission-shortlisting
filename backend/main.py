@@ -17,8 +17,8 @@ app = FastAPI(title="Sairam Group Admission Portal")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
-        "http://192.168.1.166:3000","https://admission-shortlisting.vercel.app"
+        "http://localhost:3000",
+        "https://your-app-name.vercel.app"  # <--- Copy this EXACTLY from your browser
     ],
     allow_credentials=True,
     allow_methods=["*"],
