@@ -1,14 +1,14 @@
+bcrypt==3.2.2
+passlib
 fastapi
 uvicorn
 sqlalchemy
 psycopg2-binary
 pydantic
 python-multipart
-passlib
 python-jose[cryptography]
 fpdf
 openai
 pandas
 cloudinary
 python-dotenv
-bcrypt==3.2.2
