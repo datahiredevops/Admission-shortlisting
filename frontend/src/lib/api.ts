@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-// --- HARDCODED FOR DEMO ---
+// --- THE FIX ---
+// We are removing the local IP entirely. 
+// This forces the app to use the Render Cloud URL.
 const API_URL = "https://sairam-backend.onrender.com"; 
 
 const api = axios.create({
