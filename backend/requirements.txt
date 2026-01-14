@@ -4,11 +4,11 @@ sqlalchemy
 psycopg2-binary
 pydantic
 python-multipart
-passlib[bcrypt]
+passlib
 python-jose[cryptography]
 fpdf
 openai
 pandas
 cloudinary
 python-dotenv
-bcrypt==3.2.2   
+bcrypt==3.2.2
