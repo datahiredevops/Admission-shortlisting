@@ -11,3 +11,4 @@ openai
 pandas
 cloudinary
 python-dotenv
+bcrypt==3.2.2   <-- ADD THIS LINE
