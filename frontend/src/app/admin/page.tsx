@@ -45,7 +45,7 @@ export default function AdminLogin() {
         
         {/* --- DEBUG BADGE --- */}
         <div className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 absolute top-2 right-2 rounded">
-          ● CLOUD CONNECTED
+          ● CLOUD CONNECTED V2
         </div>
 
         <div className="text-center mb-8">
