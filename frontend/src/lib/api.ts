@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-// --- THE NUCLEAR FIX ---
-// Replace the URL inside the quotes with your ACTUAL Render Backend URL.
-// Do NOT leave a slash (/) at the end.
+// --- HARDCODED FOR DEMO ---
 const API_URL = "https://sairam-backend.onrender.com"; 
 
 const api = axios.create({
