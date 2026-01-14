@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "../../lib/api"; // <--- Uses your Cloud API helper
+// FIX: Correct number of dots to reach the lib folder
+import api from "../../lib/api"; 
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      // Uses the centralized API helper (which points to Render)
+      // FIX: Use the 'api' helper (connected to Cloud) instead of 'axios' (connected to Localhost)
       const res = await api.post("/admin/login/", { 
         email, 
         password 
@@ -30,7 +31,9 @@ export default function AdminLogin() {
       
     } catch (err: any) {
       console.error("Login Error:", err);
-      setError("Login Failed. Please check your credentials.");
+      // specific error message or generic fallback
+      const msg = err.response?.data?.detail || "Login Failed. Check credentials.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
