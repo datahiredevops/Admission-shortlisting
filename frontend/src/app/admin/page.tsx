@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios"; // We will use direct Axios, no imports to break
+import axios from "axios";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -10,8 +10,7 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // --- HARDCODED CLOUD URL ---
-  // This guarantees we never touch 192.168...
+  // --- FIX: UPDATED URL WITH -0q3y ---
   const BACKEND_URL = "https://sairam-backend-0q3y.onrender.com";
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -22,7 +21,6 @@ export default function AdminLogin() {
     console.log("Attempting login to:", `${BACKEND_URL}/admin/login/`);
 
     try {
-      // Direct call to the cloud
       const res = await axios.post(`${BACKEND_URL}/admin/login/`, { 
         email, 
         password 
@@ -43,9 +41,9 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-blue-600 font-sans">
       <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md border border-gray-100 relative overflow-hidden">
         
-        {/* --- DEBUG BADGE --- */}
-        <div className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 absolute top-2 right-2 rounded">
-          ● CLOUD CONNECTED V2
+        {/* --- DEBUG BADGE V3 --- */}
+        <div className="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 absolute top-2 right-2 rounded">
+          ● CLOUD CONNECTED V3
         </div>
 
         <div className="text-center mb-8">
