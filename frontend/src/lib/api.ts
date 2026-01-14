@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-// --- THE FIX ---
-// We check the Environment Variable FIRST. 
-// If it exists (like on Vercel), we use it. 
-// If it's missing (like on Localhost), we use your IP.
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.166:8000"; 
+// --- THE NUCLEAR FIX ---
+// Replace the URL inside the quotes with your ACTUAL Render Backend URL.
+// Do NOT leave a slash (/) at the end.
+const API_URL = "https://sairam-backend.onrender.com"; 
 
 const api = axios.create({
   baseURL: API_URL,
