@@ -1,12 +1,23 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.staticfiles import StaticFiles  <-- Removed (Not needed for Cloudinary)
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 import models, database, logic, auth, utils_pdf 
 import ai_agent
+
+# ==========================================
+# 🛡️ CRITICAL FIX: MONKEY PATCH (Added This)
+# ==========================================
+# This fixes the crash between passlib and bcrypt 4.0+
+# It manually adds the missing '__about__' attribute.
+import bcrypt
+if not hasattr(bcrypt, "__about__"):
+    class About:
+        __version__ = bcrypt.__version__
+    bcrypt.__about__ = About()
+# ==========================================
 
 # Create tables (Auto-update if models changed)
 models.Base.metadata.create_all(bind=database.engine)
@@ -19,15 +30,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://192.168.1.166:3000",
-        "https://admission-shortlisting.vercel.app"  # <--- I added your Vercel link here
+        "https://admission-shortlisting.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# NOTE: app.mount("/files"...) is REMOVED. 
-# We now use Cloudinary URLs which are direct links (e.g., https://res.cloudinary.com/...)
 
 # ==========================================
 # 1. SCHEMAS (Data Rules)
