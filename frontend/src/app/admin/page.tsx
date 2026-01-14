@@ -40,7 +40,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-blue-600 font-sans">
       <div className="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md border border-gray-100 relative overflow-hidden">
         
         {/* --- DEBUG BADGE --- */}
